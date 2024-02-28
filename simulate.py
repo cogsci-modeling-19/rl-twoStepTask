@@ -6,10 +6,12 @@ from agents.model_free import AgentModelFree
 from agents.hybrid import HybridAgent
 from agents.random_agent import RandomAgent
 from environment import TwoStepEnv
+from exp_environment import TwoStepExperimentEnv
 from utils import random_walk_gaussian
 
 
 def simulate(agent_type='random', trials=200, seed=0, verbose=False, params:dict={}):
+    data_filename = 'data/participants/experiment_data_mj.csv'
     if verbose:
         print(f"Simulating {agent_type} agent, {trials} trials.")
         print(f"Agent parameters: {params if params else 'default'}")
@@ -17,8 +19,8 @@ def simulate(agent_type='random', trials=200, seed=0, verbose=False, params:dict
     np.random.seed(seed)
 
     # simulate the task
-    action_space = TwoStepEnv.action_space
-    state_space = TwoStepEnv.state_space
+    action_space = TwoStepExperimentEnv.action_space
+    state_space = TwoStepExperimentEnv.state_space
 
     if agent_type == 'model_based':
         agent = AgentModelBased(action_space, state_space, **params)
@@ -28,7 +30,7 @@ def simulate(agent_type='random', trials=200, seed=0, verbose=False, params:dict
         agent = HybridAgent(action_space, state_space, **params)
     else:
         agent = RandomAgent(action_space, state_space, **params)
-    env = TwoStepEnv()
+    env = TwoStepExperimentEnv(data_filename)
     task_data = simulate_two_step_task(env, agent, trials=trials)
 
     # convert the data to a dataframe
@@ -36,7 +38,7 @@ def simulate(agent_type='random', trials=200, seed=0, verbose=False, params:dict
 
     return task_df, agent
 
-def simulate_two_step_task(env: TwoStepEnv, agent=None, trials=200,
+def simulate_two_step_task(env, agent=None, trials=200,
                            policy_method="softmax"):
     env.reset()
     task_data = {}
@@ -62,9 +64,9 @@ def simulate_two_step_task(env: TwoStepEnv, agent=None, trials=200,
         info['trial_index'] = int(time_step)
         task_data[time_step] = info
         env.reset()
-        new_reward_prob_matrix = random_walk_gaussian(env.reward_prob_matrix,
-                                                      sd_for_random_walk)
-        env.set_reward_probabilities(new_reward_prob_matrix)
+        # new_reward_prob_matrix = random_walk_gaussian(env.reward_prob_matrix,
+        #                                               sd_for_random_walk)
+        # env.set_reward_probabilities(new_reward_prob_matrix)
         time_step += 1
 
     return task_data
