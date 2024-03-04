@@ -2,14 +2,21 @@ import numpy as np
 
 
 class AgentModelBased:
-    def __init__(self, action_space, state_space, alpha=0.1, beta=1.0,
-                 epsilon=0.2, gamma=0.9):
+    """
+    Model Based Agent that uses TD leaning (SARSA(1)) combined with a transition model to update its Q-table.
+    Initialize Model Based Agent
+    :param action_space: List of possible actions
+    :param state_space: List of possible states
+    :param alpha: Learning rate
+    :param beta: Inverse temperature parameter for softmax policy
+    :param gamma: Discount factor
+    """
+    def __init__(self, action_space, state_space, alpha=0.1, beta=1.0, gamma=0.9):
         self.action_space = action_space
         self.state_space = state_space
         self.alpha = alpha  # Learning rate
         self.gamma = gamma  # Discount factor
         self.beta = beta  # Temperature parameter for softmax policy
-        self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
         self.q_table = np.zeros((len(state_space), len(action_space)))
 
         # Initialize transition model as a 3D numpy array
@@ -28,21 +35,12 @@ class AgentModelBased:
         return e_x / e_x.sum(
             axis=0)  # axis=0 for column-wise operation if arr is 2D, otherwise it's not needed
 
-    def policy(self, state, beta=None, epsilon=None, method="softmax"):
+    def policy(self, state, beta=None):
         q_values = self.q_table[state, :]
         beta = self.beta if beta is None else beta
-        epsilon = self.epsilon if epsilon is None else epsilon
         # calculate the probability of each action in the state with softmax
-        if method == "softmax":
-            action_probabilities = self.softmax(q_values, beta)
-            action = np.random.choice(self.action_space, p=action_probabilities)
-
-        # with epsilon gready policy
-        else:
-            if np.random.uniform() < epsilon:
-                action = np.random.choice(self.action_space)
-            else:
-                action = np.argmax(q_values)
+        action_probabilities = self.softmax(q_values, beta)
+        action = np.random.choice(self.action_space, p=action_probabilities)
 
         return action
 
@@ -137,3 +135,13 @@ class AgentModelBased:
                                            len(self.action_space),
                                            len(self.state_space)))
         # return self.q_table, self.transition_model, self.transition_counts
+
+    def __str__(self):
+        discribtion = "Model Based Agent\n"
+        discribtion += "Action Space: " + str(self.action_space) + "\n"
+        discribtion += "State Space: " + str(self.state_space) + "\n"
+        discribtion += "Alpha: " + str(self.alpha) + "\n"
+        discribtion += "Beta: " + str(self.beta) + "\n"
+        discribtion += "Gamma: " + str(self.gamma) + "\n"
+        return discribtion
+    

@@ -2,16 +2,31 @@ import numpy as np
 import pandas as pd
 import os
 from datetime import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-from IPython.display import display
+
+def softmax(arr, beta):
+    """
+    Softmax function for action selection
+    :param arr: The array of action values
+    :param beta: Inverse temparature parameter for the softmax policy (higher beta -> more deterministic)
+    :return: The probabilities of each action, sums up to 1
+    """
+    e_x = np.exp(beta * (arr - np.max(arr)))  # Subtract max value to prevent overflow
+    return e_x / e_x.sum(axis=0)
 
 def random_walk_gaussian(prob, sd, min_prob=0, max_prob=1):
+    """
+    Simulate a random walk in the reward probabilities using Gaussian noise
+    :param prob: initial reward probabilities
+    :param sd: standard deviation of the noise
+    :param min_prob: minimum range
+    :param max_prob: maximum range
+    :return: new reward probabilities with added noise
+    """
     new_prob = prob + np.random.normal(scale=sd, size=np.shape(prob))
     new_prob = np.clip(new_prob, min_prob, max_prob)
     return new_prob
 
-def load_files_from_folder(folder_path, max_files=None, file_end='.csv'):
+def load_files_from_folder(folder_path, max_files=None, extension='.csv'):
     """
     Load CSV files from a specified folder.
 
@@ -19,7 +34,7 @@ def load_files_from_folder(folder_path, max_files=None, file_end='.csv'):
     :param max_files: Maximum number of CSV files to load. If None, all files are loaded.
     :return: A list of pandas DataFrames.
     """
-    csv_files = [f for f in os.listdir(folder_path) if f.endswith(file_end)]
+    csv_files = [f for f in os.listdir(folder_path) if f.endswith(extension)]
     
     # Sort files alphabetically to ensure consistent order
     csv_files.sort()
@@ -48,6 +63,12 @@ def load_latest_simulated_data(agent_type):
     return task_df
 
 def save_simulated_data(task_df: pd.DataFrame, agent_type: str):
+    """
+    Save the simulated data to a csv file
+    :param task_df: data as a dataframe
+    :param agent_type: ['model_free', 'model_based', 'hybrid'] (used in path)
+    :return: 
+    """
     # save the data to a csv file
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     file_path = os.path.join("data", "simulated", agent_type, timestamp)
@@ -61,6 +82,12 @@ def convert_1d_numeric_string_array_to_array(string_array: str) -> np.array:
     return np.array([float(i) for i in string_array.strip('[]').replace(',', ' ').split()])
 
 def detect_and_convert_1d_string_array(string_array: str):
+    """
+    Helper function to detect the type of the elements in a string array and convert them to the appropriate type
+    Used for converting the rewardProbabilities and rewardDistribution columns from string to array
+    :param string_array: array as a string, taken from experiment data
+    :return: string converted to actual array
+    """
     # Remove the outer brackets and split by ',' to handle both 1D and multidimensional arrays
     elements = string_array.strip('[]').replace(' ', '').split(',')
     # Attempt to determine the type of each element
@@ -89,6 +116,11 @@ def detect_and_convert_1d_string_array(string_array: str):
     return result_array
 
 def preprocess_human_data(data_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Preprocess the human data from the experiments
+    :param data_df: experiment data as a dataframe
+    :return: preprocessed data
+    """
     data = data_df.copy()
     
     # rename column reward_Param to rewardDistribution
@@ -112,17 +144,13 @@ def preprocess_human_data(data_df: pd.DataFrame) -> pd.DataFrame:
 
     return data
 
-def softmax(arr, beta):
-    e_x = np.exp(beta * (arr - np.max(arr)))  # subtract max value to prevent overflow
-    return e_x / e_x.sum(axis=0)  # axis=0 for column-wise operation if arr is 2D, otherwise it's not needed
-
 def calculate_bic(num_params, num_data_points, ll):
     """
     Calculates Bayesian Information Criterion to be used in model comparison
     :param num_params: Number of free parameters that the model has
     :param num_data_points: Number of data points the model has been fitted to
     :param ll: Maximum log likelihood estimation for the model given data
-    :return:
+    :return: BIC value
     """
     return num_params * np.log(num_data_points) - 2 * ll
 

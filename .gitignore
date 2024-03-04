@@ -1,6 +1,7 @@
 # data
 data/
 plots/
+comparison_results/
 #logs
 *.log
 log.txt

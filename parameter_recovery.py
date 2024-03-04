@@ -1,5 +1,5 @@
 from simulate import simulate
-from parameter_fitting import fit_with_MCMC ,fit_with_minimize, fit_with_grid_search, fit_with_random_search, get_best_params_and_ll
+from parameter_fitting import fit_with_MCMC, fit_with_grid_search, fit_with_random_search, get_best_params_and_ll
 from scipy.stats import pearsonr
 import numpy as np
 import pandas as pd
@@ -13,8 +13,23 @@ from datetime import datetime
 # import the tqdm library combpatibilitle with jupyter notebook
 from tqdm.notebook import tqdm
 
-def param_recovery(agent_type:str, parameter_space:dict,  fit_type='MCMC', num_runs:int=20,
+def param_recovery(agent_type:str, parameter_space:dict,  fit_method='MCMC', num_runs:int=20,
                     seed:int=None, show_progress=True, **kwargs):
+    """
+    Function to recover the parameters of the model using the specified fit_type
+    Args:
+    - agent_type: str, type of the agent to simulate and fit
+    - parameter_space: dict, dictionary of the parameter space to search for the best parameters
+    - fit_method: str, type of the fit to use, one of 'MCMC', 'minimize_search', 'random_search', 'grid_search'
+    - num_runs: int, number of runs to perform to recover the parameters
+    - seed: int, seed for the random number generator
+    - show_progress: bool, whether to show the progress bar
+    - **kwargs: additional arguments to pass to the fit function
+    Returns:
+    - fitted_params: dict, dictionary of the fitted parameters
+    - true_params: dict, dictionary of the true parameters
+    - best_LLs: list, list of the best log likelihoods for each run
+    """
 
     true_params = {param : np.random.uniform(np.min(parameter_space[param]), np.max(parameter_space[param]), num_runs)
                     for param in parameter_space.keys()}
@@ -27,29 +42,22 @@ def param_recovery(agent_type:str, parameter_space:dict,  fit_type='MCMC', num_r
         # simulate the data
         data, _ = simulate(agent_type, params=params, seed=seed)
         # fit the model to the data
-        if fit_type == 'minimize_search':
-            best_params, best_LL, fit_results = fit_with_minimize(parameter_space, data, agent_type=agent_type,
-                                            consider_both_stages=kwargs.get('consider_both_stages', True),
-                                            num_initializations=kwargs.get('num_iterations', 10),
-                                            verbose=kwargs.get('verbose', False))
-        elif fit_type == 'random_search':
+        if fit_method == 'random_search':
             best_params, best_LL, fit_results = fit_with_random_search(parameter_space, data, agent_type=agent_type,
                                                 seed=seed,
                                                 consider_both_stages=kwargs.get('consider_both_stages', True),
-                                                num_iterations=kwargs.get('num_iterations', 10),
-                                                verbose=kwargs.get('verbose', False))
-        elif fit_type == 'grid_search':
+                                                num_iterations=kwargs.get('num_iterations', 1000))
+        elif fit_method == 'grid_search':
             best_params, best_LL, fit_results = fit_with_grid_search(parameter_space, data, agent_type=agent_type,
-                                                consider_both_stages=kwargs.get('consider_both_stages', True),
-                                                verbose=kwargs.get('verbose', False))
-        elif fit_type == 'MCMC':
+                                                consider_both_stages=kwargs.get('consider_both_stages', True))
+        elif fit_method == 'MCMC':
             best_params, best_LL, fit_results = fit_with_MCMC(parameter_space, data, agent_type=agent_type,
                                                               consider_both_stages=kwargs.get('consider_both_stages', True),
-                                                                num_samples=kwargs.get('num_samples', 900),
+                                                                num_samples=kwargs.get('num_samples', 400),
                                                                 num_burn_in=kwargs.get('num_burn_in', 100),
-                                                                verbose=kwargs.get('verbose', False))
+                                                                num_chains=kwargs.get('num_chains', 2))
         else:
-            raise ValueError(f'fit_type: {fit_type} not supported, use one of : "minimize_search", "random_search", "grid_search"')
+            raise ValueError(f'fit_type: {fit_method} not supported, use one of : "minimize_search", "random_search", "grid_search"')
         
         # store the fitted parameters and the true parameters
         for param in parameter_space.keys():
@@ -104,8 +112,9 @@ def plot_param_recovery(true_params:dict, fitted_params:dict, title='', max_plot
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 
@@ -141,8 +150,9 @@ def plot_param_correlation(fitted_params:dict, title='', save=False, filename='p
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 

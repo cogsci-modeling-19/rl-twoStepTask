@@ -1,15 +1,11 @@
 import numpy as np
-from utils import softmax
-
-"""
-Hybrid agent similar to the one used in Daw et al. (2011)
-"""
 
 
 class HybridAgent:
-    def __init__(self, action_space, state_space, alpha_1=0.1, alpha_2=0.1, beta_1=1.0, beta_2=1.0, _lambda=0.5,
-                 w=0.5, p=0):
+    def __init__(self, action_space, state_space, alpha_1=0.54, alpha_2=0.42, beta_1=5.19, beta_2=3.69, _lambda=0.57,
+                 w=0.39, p=0.11):
         """
+        Hybrid agent similar to the one used in Daw et al. (2011)
         Initialize hybrid agent
         :param action_space: Action space of the environment
         :param state_space: State space of the environment
@@ -139,7 +135,7 @@ class HybridAgent:
             rep_a[self.previous_action] = 1
         return self.softmax(self.q_net[state, :], beta, self.p, rep_a)
 
-    def policy(self, state, method=None):
+    def policy(self, state):
         return np.random.choice(self.action_space, p=self.get_action_probabilities(state))
 
     def softmax(self, q_values, beta, p, rep_a):
@@ -152,6 +148,29 @@ class HybridAgent:
         exp_values_sum = np.sum(exp_values, axis=0)
 
         # Compute the softmax probabilities
-        probabilities = exp_values / exp_values.sum(axis=0)
+        probabilities = exp_values / exp_values_sum
 
         return probabilities
+
+    def reset(self):
+        self.q_td = np.zeros((len(self.state_space), len(self.action_space)))
+        self.q_mb = np.zeros((len(self.state_space), len(self.action_space)))
+        self.q_net = np.zeros((len(self.state_space), len(self.action_space)))
+        self.q_table = self.q_net
+        self.transition_model = np.zeros((len(self.state_space), len(self.action_space), len(self.state_space)))
+        self.transition_counts = np.zeros((len(self.state_space), len(self.action_space), len(self.state_space)))
+        self.eligibility_traces = np.zeros((len(self.state_space), len(self.action_space)))
+        self.previous_action = None
+
+    def __str__(self):
+        discribtion = "Hybrid Agent\n"
+        discribtion += "Action Space: " + str(self.action_space) + "\n"
+        discribtion += "State Space: " + str(self.state_space) + "\n"
+        discribtion += "Alpha 1: " + str(self.alpha_1) + "\n"
+        discribtion += "Alpha 2: " + str(self.alpha_2) + "\n"
+        discribtion += "Beta 1: " + str(self.beta_1) + "\n"
+        discribtion += "Beta 2: " + str(self.beta_2) + "\n"
+        discribtion += "Lambda: " + str(self._lambda) + "\n"
+        discribtion += "W: " + str(self.w) + "\n"
+        discribtion += "P: " + str(self.p) + "\n"
+        return discribtion

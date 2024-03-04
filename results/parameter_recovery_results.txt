@@ -1,0 +1,31 @@
+hybrid
+
+Pearson correlation for alpha_1: 0.154, p_value: 0.12517786476262616
+Pearson correlation for alpha_2: 0.731, p_value: 6.041539141657598e-18
+Pearson correlation for beta_1: 0.630, p_value: 2.1610533057091407e-12
+Pearson correlation for beta_2: 0.974, p_value: 4.870463950934347e-65
+Pearson correlation for _lambda: 0.057, p_value: 0.5745124096928428
+Pearson correlation for w: 0.372, p_value: 0.00013906236642841787
+Pearson correlation for p: 0.230, p_value: 0.02135775615532307
+
+----------------------------------------------------------------------------
+hybrid_mf
+
+Pearson correlation for alpha_1: 0.326, p_value: 0.0009392988782992144
+Pearson correlation for alpha_2: 0.507, p_value: 7.336936964419426e-08
+Pearson correlation for beta_1: 0.803, p_value: 1.0077125025253042e-23
+Pearson correlation for beta_2: 0.959, p_value: 1.0785753928213066e-55
+Pearson correlation for _lambda: 0.291, p_value: 0.0033585917314791947
+Pearson correlation for w: nan, p_value: nan
+Pearson correlation for p: 0.574, p_value: 4.443689237702298e-10
+
+----------------------------------------------------------------------------
+hybrid_mb
+
+Pearson correlation for alpha_1: nan, p_value: nan
+Pearson correlation for alpha_2: 0.676, p_value: 1.198912911478308e-14
+Pearson correlation for beta_1: 0.745, p_value: 5.932886241712098e-19
+Pearson correlation for beta_2: 0.978, p_value: 2.8032479724533306e-68
+Pearson correlation for w: nan, p_value: nan
+Pearson correlation for p: 0.421, p_value: 1.314220065221494e-05
+

@@ -9,24 +9,49 @@ from IPython.display import display
 from tqdm.notebook import tqdm
 
 def calc_plot_stay_probabilities(dfs: list[pd.DataFrame], labels: list[str]=None, title='', plot=True, return_df=True, max_plots_per_row=4, save=False, filename="plots/stay_probabilities.png"):
+    """
+    Calculate and plot the stay probabilities for the given dataframes
+    :param dfs: List of dataframes
+    :param labels: Labels for the dataframes
+    :param title: Title for the plot
+    :param plot: Plot the data if True
+    :param return_df: Return the dataframes if True
+    :param max_plots_per_row: Maximum number of plots per row
+    :param save: Save the plot if True
+    :param filename: Filename for the plot (if save=True)
+    :return: dictioanry of stay probabilities for each dataframe and label
+    """
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]
-    # calculate stay probabilities
-    stay_probabilities = [calculate_stay_probability(df) for df in dfs]
-    # plot the stay probabilities
+    if isinstance(labels, str) or not isinstance(labels, list):
+        labels = [labels]
     if not labels or len(labels) != len(dfs):
         print("Labels not provided or not matching the number of dataframes, using default labels")
         labels = [f"data {i+1}" for i in range(len(dfs))]
         print('generated labels:', labels)
+    
+    # calculate stay probabilities
+    stay_probabilities = [calculate_stay_probability(df) for df in dfs]
+    # plot the stay probabilities
     if plot:
         plot_stay_probabilities(dfs=stay_probabilities, labels=labels, title=title, max_plots_per_row=max_plots_per_row, save=save, filename=filename)
+    
     stay_probabilities = dict(zip(labels, stay_probabilities))
+    
     if return_df:
         return stay_probabilities
 
 def calc_plot_stay_probabilities_blocks(dfs: list[pd.DataFrame], labels: list[str]=None, title='', num_blocks=4, plot=True, return_df=True, max_plots_per_row=4, save=False, filename="plots/stay_probabilities_blocks.png"):
+    
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]
+    if isinstance(labels, str) or not isinstance(labels, list):
+        labels = [labels]
+    if not labels or len(labels) != len(dfs):
+        print("Labels not provided or not matching the number of dataframes, using default labels")
+        labels = [f"data {i+1}" for i in range(len(dfs))]
+        print('generated labels:', labels)
+
     # calculate stay probabilities
     stay_probabilities_blocks = [calculate_stay_probability_blocks(df, num_blocks=num_blocks) for df in dfs]
     # plot the stay probabilities
@@ -39,6 +64,13 @@ def calc_plot_stay_probabilities_blocks(dfs: list[pd.DataFrame], labels: list[st
 def calc_plot_stay_probabilities_moving_average(dfs: list[pd.DataFrame], labels: list[str]=None, title='', window_size=50, plot=True, return_df=True, max_plots_per_row=4, save=False, filename="plots/stay_probabilities_ma.png"):
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]
+    if isinstance(labels, str) or not isinstance(labels, list):
+        labels = [labels]
+    if not labels or len(labels) != len(dfs):
+        print("Labels not provided or not matching the number of dataframes, using default labels")
+        labels = [f"data {i+1}" for i in range(len(dfs))]
+        print('generated labels:', labels)
+
     # calculate stay probabilities
     stay_probabilities_moving_average = [calculate_stay_probability_moving_average(df, window_size=window_size)
                                         for df in dfs]
@@ -52,6 +84,13 @@ def calc_plot_stay_probabilities_moving_average(dfs: list[pd.DataFrame], labels:
 def calc_plot_running_stay_probabilities(dfs: list[pd.DataFrame], labels: list[str]=None, title='', window_size=50, plot=True, return_df=True, max_plots_per_row=4, save=False, filename="plots/running_stay_probabilities.png"):
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]
+    if isinstance(labels, str) or not isinstance(labels, list):
+        labels = [labels]
+    if not labels or len(labels) != len(dfs):
+        print("Labels not provided or not matching the number of dataframes, using default labels")
+        labels = [f"data {i+1}" for i in range(len(dfs))]
+        print('generated labels:', labels)
+    
     # calculate stay probabilities
     running_stay_probabilities = [calculate_running_stay_probabilities(df) for df in dfs]
     # plot the stay probabilities
@@ -64,6 +103,13 @@ def calc_plot_running_stay_probabilities(dfs: list[pd.DataFrame], labels: list[s
 def calc_plot_running_average_cumulative_reward(dfs: list[pd.DataFrame], labels: list[str]=None, title='', window_size=50, plot=True, return_df=True, max_plots_per_row=4, save=False, filename="plots/average_cumulative_reward.png"):
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]
+    if isinstance(labels, str) or not isinstance(labels, list):
+        labels = [labels]
+    if not labels or len(labels) != len(dfs):
+        print("Labels not provided or not matching the number of dataframes, using default labels")
+        labels = [f"data {i+1}" for i in range(len(dfs))]
+        print('generated labels:', labels)
+    
     # calculate the moving average of the reward
     running_average_cumulative_reward = [calculate_average_cumulative_reward_moveing_average(df, window_size=window_size)
                                         for df in dfs]
@@ -73,23 +119,30 @@ def calc_plot_running_average_cumulative_reward(dfs: list[pd.DataFrame], labels:
     if return_df:
         return running_average_cumulative_reward
 
-def calc_plot_stay_probability_paired_diffs(sampled_data_lists, model_titles=None, plot=True, return_df=True, max_plots_per_row=3, save=False, filename='plots/stay_prob_diffs.png'):
+def calc_plot_stay_probability_paired_diffs(sampled_data_lists, model_titles=None, title='', plot=True, return_df=True, max_plots_per_row=3, save=False, filename='plots/stay_prob_diffs.png'):
     n_plots = len(sampled_data_lists)
     if model_titles is None:
         model_titles = [f'Model {i}' for i in range(len(sampled_data_lists))]
     mean_diffs_all_models = calculate_stay_probability_paired_diffs(sampled_data_lists, model_titles)
     if plot:
-        plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, max_plots_per_row=max_plots_per_row, save=save, filename=filename)
+        plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, title=title, max_plots_per_row=max_plots_per_row, save=save, filename=filename)
     if return_df:
         return mean_diffs_all_models
 
 def print_simple_task_summary(data: pd.DataFrame, title="", full=False):
+    """
+    Print some simple statistics about the data
+    :param data: pandas dataframe
+    :param title: string
+    :param full: print full statistics if True
+    :return: 
+    """
     # print some statistics 
     # print_simple_statistics(task_df)
     task_df = data.copy()
     print("###", title)
 
-    print("common transitions percentage:", np.mean(task_df["common_transition"])*100, "%")
+    print("common transitions percentage in the task:", np.mean(task_df["common_transition"])*100, "%")
     print("rewarded trails percentage:", np.mean(task_df["reward"] > 0)*100, "%")
 
     if full:
@@ -290,7 +343,7 @@ def calculate_stay_probability_paired_diffs(sampled_data_lists, model_titles):
             diff['diff_rewarded_rare'] = rewarded_rare - rewarded_common
             diff['unrewarded_common'] = unrewarded_common
             diff['diff_unrewarded_rare'] = unrewarded_rare - unrewarded_common
-            diff['diff_rewarded_unrewarded'] = diff['diff_rewarded_rare'] - diff['diff_unrewarded_rare']
+            diff['diff_rewarded_unrewarded'] = (rewarded_common - unrewarded_common) + (rewarded_rare - unrewarded_rare)
             diffs.append(diff)
         
         # Calculate mean differences for the current model type
@@ -312,7 +365,7 @@ def calculate_average_cumulative_reward_moveing_average(data: pd.DataFrame, wind
 # plotting functions
 
 def plot_running_average_cumulative_reward(dfs: list[pd.DataFrame], labels: list[str]=None, title='', max_plots_per_row=4, save=False, filename="plots/average_cumulative_reward.png"):
-    sns.set_style("whitegrid")
+    # sns.set_style("whitegrid")
     
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]  # Wrap the single DataFrame in a list
@@ -326,15 +379,12 @@ def plot_running_average_cumulative_reward(dfs: list[pd.DataFrame], labels: list
     cols = min(n_plots, max_plots_per_row)  # Max of 4 columns
     
     fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(6*cols, 6*rows), sharey=True, sharex=True)
+    fig.suptitle(title)
     
     # If there's only one subplot, axes won't be an array, so we wrap it in a list for consistency
     if n_plots == 1:
-        axes = [axes]
-    else:
-        # Flatten the axes array to simplify indexing
-        axes = axes.flatten()
-
-    fig.suptitle(title)
+        axes = np.array([axes])
+    axes = axes.flatten()
 
     if labels is None:
         labels = [f"Plot {i}" for i in range(len(dfs))]
@@ -372,13 +422,14 @@ def plot_running_average_cumulative_reward(dfs: list[pd.DataFrame], labels: list
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 
 def plot_stay_probabilities(dfs: list[pd.DataFrame], labels: list[str]=None, title='', max_plots_per_row=4, save=False, filename="plots/stay_probabilities.png"):
-    sns.set_style("whitegrid")
+    # sns.set_style("whitegrid")
     
     if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
         dfs = [dfs]  # Wrap the single DataFrame in a list
@@ -392,15 +443,12 @@ def plot_stay_probabilities(dfs: list[pd.DataFrame], labels: list[str]=None, tit
     cols = min(n_plots, max_plots_per_row)  # Max of 4 columns
     
     fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(6*cols, 6*rows), sharey=True, sharex=True)
-    
+    fig.suptitle(title)
+
     # If there's only one subplot, axes won't be an array, so we wrap it in a list for consistency
     if n_plots == 1:
-        axes = [axes]
-    else:
-        # Flatten the axes array to simplify indexing
-        axes = axes.flatten()
-
-    fig.suptitle(title)
+        axes = np.array([axes])
+    axes = axes.flatten()
 
     if labels is None:
         labels = [f"Plot {i}" for i in range(len(dfs))]
@@ -458,8 +506,9 @@ def plot_stay_probabilities(dfs: list[pd.DataFrame], labels: list[str]=None, tit
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 
@@ -482,15 +531,13 @@ def plot_stay_probabilities_progression(dfs: list[pd.DataFrame], title='', label
     cols = min(n_plots, max_plots_per_row)  # Max of 4 columns
 
     fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(6*cols, 6*rows), sharey=True, sharex=True)
+    fig.suptitle(title)
 
     # If there's only one subplot, axes won't be an array, so we wrap it in a list for consistency
     if n_plots == 1:
-        axes = [axes]
-    else:
-        # Flatten the axes array to simplify indexing
-        axes = axes.flatten()
+        axes = np.array([axes])
+    axes = axes.flatten()
     
-    fig.suptitle(title)
     # plot the moving averages for all 4 conditions over the trials
     for i, ax in enumerate(axes):
         if i < n_plots:
@@ -515,41 +562,39 @@ def plot_stay_probabilities_progression(dfs: list[pd.DataFrame], title='', label
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 
-def plot_running_stay_probabilities(task_dfs:list, labels:list=None,window_size=1, max_plots_per_row=3, title='', save=False, filename="plots/running_step_probabilities.png"):
+def plot_running_stay_probabilities(dfs:list, labels:list=None,window_size=1, max_plots_per_row=3, title='', save=False, filename="plots/running_step_probabilities.png"):
     
-    if isinstance(task_dfs, pd.DataFrame) or not isinstance(task_dfs, list):
-        task_dfs = [task_dfs]
+    if isinstance(dfs, pd.DataFrame) or not isinstance(dfs, list):
+        dfs = [dfs]
     if labels is not None and not isinstance(labels, list):
         labels = [labels]
 
     # Create a copy of the DataFrame to avoid modifying the original
-    n_plots = len(task_dfs)
+    n_plots = len(dfs)
     # Calculate the number of rows and columns for the subplot grid
     rows = (n_plots - 1) // max_plots_per_row + 1  # Ensure at least one row
     cols = min(n_plots, max_plots_per_row)  # Max of 4 columns
     
     fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(6*cols, 6*rows), sharey=True, sharex=True)
+    fig.suptitle(title)
     
     # If there's only one subplot, axes won't be an array, so we wrap it in a list for consistency
     if n_plots == 1:
-        axes = [axes]
-    else:
-        # Flatten the axes array to simplify indexing
-        axes = axes.flatten()
-
-    fig.suptitle(title)
+        axes = np.array([axes])
+    axes = axes.flatten()
 
     if labels is None:
-        labels = [f"Plot {i}" for i in range(len(task_dfs))]
-    if len(labels) < len(task_dfs):
-        labels = labels + [f"Plot {i}" for i in range(len(task_dfs) - len(labels))]
+        labels = [f"Plot {i}" for i in range(len(dfs))]
+    if len(labels) < len(dfs):
+        labels = labels + [f"Plot {i}" for i in range(len(dfs) - len(labels))]
     
-    for i, data in enumerate(task_dfs):
+    for i, data in enumerate(dfs):
         ax = axes[i]
         df_copy = data.copy()
 
@@ -584,12 +629,13 @@ def plot_running_stay_probabilities(task_dfs:list, labels:list=None,window_size=
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 
-def plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, max_plots_per_row=3, save=False, filename='plots/stay_prob_diffs.png'):
+def plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, title='', max_plots_per_row=3, save=False, filename='plots/stay_prob_diffs.png'):
     n_plots = len(model_titles)
     if n_plots != len(model_titles):
         raise ValueError('sampled_data_lists and model_titles must have the same length')
@@ -599,6 +645,7 @@ def plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, max_plots_p
     cols = min(n_plots, max_plots_per_row) 
     # Plot the differences for each model type
     fig, axes = plt.subplots(rows, cols, figsize=(5*cols, 5*rows), sharey=True)
+    fig.suptitle(title)
     if n_plots == 1:  # If there's only one model, ensure axes is iterable
         axes = np.array([axes])
     axes = axes.flatten()
@@ -611,7 +658,8 @@ def plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, max_plots_p
         mean_diffs.pop('unrewarded_common', None)
         ax.bar(mean_diffs.keys(), mean_diffs.values())
         ax.set_title(title)
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+        xticks_labels = ax.get_xticklabels()
+        ax.set_xticklabels(xticks_labels, rotation=45)
         ax.axhline(0, color='grey', linewidth=0.8)
 
     plt.tight_layout()
@@ -619,8 +667,9 @@ def plot_stay_prob_paired_diffs(mean_diffs_all_models, model_titles, max_plots_p
     if save:
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # add timestamp to filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = filename.replace('.png', f'_{timestamp}.png')
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
         fig.savefig(filename)
         print(f'Plot saved to {filename}')
 

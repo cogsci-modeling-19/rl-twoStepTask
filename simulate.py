@@ -8,7 +8,18 @@ import pandas as pd
 import numpy as np
 
 
-def simulate(agent_type='random', trials=200, seed=None, verbose=False, params:dict={}, from_data:pd.DataFrame=None, use_reward_distribution=True):
+def simulate(agent_type='random', trials=200, seed=None, verbose=False, params:dict={}, from_data:pd.DataFrame=None, use_reward_distribution=False):
+    """
+    Simulate the two-step task using the environment and the given agent
+    :param agent_type: ['random', 'model_free', 'model_based', 'hybrid']
+    :param trials: number of trials to simulate
+    :param seed: random seed
+    :param verbose: print details if True
+    :param params: parameters for the agent
+    :param from_data: use reward probabilities from the given data
+    :param use_reward_distribution: use the same sampled reward distribution if True
+    :return: simulated task data as a dataframe and the agent
+    """
     if verbose:
         print(f"Simulating {agent_type} agent, {trials} trials.")
         print(f"Agent parameters: {params if params else 'default'}")
@@ -37,9 +48,18 @@ def simulate(agent_type='random', trials=200, seed=None, verbose=False, params:d
     np.random.seed(None)
     return task_df, agent
 
-def simulate_two_step_task(env: TwoStepEnv, agent=None, trials=200,
-                           policy_method="softmax", from_data:pd.DataFrame=None, use_reward_distribution=True):
-    env.reset()
+def simulate_two_step_task(env: TwoStepEnv, agent, trials=200,
+                           from_data:pd.DataFrame=None, use_reward_distribution=True):
+    """
+    Simulate with given agent
+    :param env: environment
+    :param agent: given agent
+    :param trials: number of trials
+    :param policy_method: method for action selection ['softmax', 'epsilon-greedy']
+    :param from_data: use reward probabilities from the given data
+    :param use_reward_distribution: use reward distribution if True
+    :return: simulated task data
+    """
     if from_data is not None:
         if use_reward_distribution:
             reward_distribution = from_data['rewardDistribution'].iloc[0]
@@ -62,10 +82,7 @@ def simulate_two_step_task(env: TwoStepEnv, agent=None, trials=200,
         terminal = False
         while not terminal:
             current_state = env.state
-            if agent:
-                action = agent.policy(env.state, method=policy_method)
-            else:  # if no agent is given -> random action
-                action = np.random.choice(env.action_space)
+            action = agent.policy(env.state)
 
             next_state, reward, terminal, info = env.step(action)
 
